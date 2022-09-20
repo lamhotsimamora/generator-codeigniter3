@@ -10,7 +10,7 @@ function validate(... $value){
 function controllerTemplate($controller_name,$model_name,$fields,$primaryKey){
 
 	$add_tmp = '';
-
+	$field_1 = '';
 	foreach ($fields as $key => $value) {
 		$field = $value['COLUMN_NAME'];
 
@@ -18,6 +18,9 @@ function controllerTemplate($controller_name,$model_name,$fields,$primaryKey){
 
 		}else{
 			$add_tmp .= '$'.$field.' = $this->input->post("'.$field.'");';
+		}
+		if ($key==1){
+			$field_1 = $field;
 		}
 	}
 
@@ -49,6 +52,8 @@ function controllerTemplate($controller_name,$model_name,$fields,$primaryKey){
 
 		$update_tmp .= '$this->'.$model_name.'->'.$field.' = $'.$field.';';
 	}
+
+	$search_tmp = '$this->'.$model_name.'->'.$field_1.'= $this->input->post("search");';
 
 	return '
 <?php
@@ -91,6 +96,18 @@ class '.$controller_name.' extends CI_Controller
 
 		if ($result){
 			echo json_encode(array("result"=>true,"message"=>"Success"));
+		}else{
+			echo json_encode(array("result"=>false,"message"=>"Failed"));
+		}
+	}
+
+	public function search(){
+		'.$search_tmp.'
+
+		$result = $this->'.$model_name.'->search();
+
+		if ($result){
+			echo json_encode(array("result"=>true,"data"=>$result));
 		}else{
 			echo json_encode(array("result"=>false,"message"=>"Failed"));
 		}
@@ -208,7 +225,7 @@ class '.$model_name.' extends CI_Model
 		$obj = $this->db->get();
 		$data  = $obj->result_array();
 
-		return (count($data) > 0) ? $data[0] : null;
+		return (count($data) > 0) ? $data : null;
 	}
 
 	public function searchLike()
@@ -220,7 +237,7 @@ class '.$model_name.' extends CI_Model
 		$obj = $this->db->get();
 		$data  = $obj->result_array();
 
-		return (count($data) > 0) ? $data[0] : false;
+		return (count($data) > 0) ? $data : false;
 	}
 
 	public function add()
