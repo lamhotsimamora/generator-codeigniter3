@@ -1,19 +1,25 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Api extends CI_Controller {
+class Api extends CI_Controller
+{
+
+	private $result_controller = false;
+	private $result_model = false;
 
 	private $directory_controller = '/application/controllers/';
 	private $directory_model = '/application/models/';
 
-	public function index(){
+	public function index()
+	{
 		$this->load->view('home');
 	}
 
-	public function loadTables(){
+	public function loadTables()
+	{
 		$this->load->model("M_database");
-		
-		$data = json_decode(file_get_contents('php://input'),true); 
+
+		$data = json_decode(file_get_contents('php://input'), true);
 		$database_name =  $data['database_name'];
 
 		validate($database_name);
@@ -23,7 +29,8 @@ class Api extends CI_Controller {
 		echo json_encode($result);
 	}
 
-	public function loadDatabases(){
+	public function loadDatabases()
+	{
 		$this->load->model("M_database");
 
 		$data = $this->M_database->getDatabases();
@@ -31,24 +38,26 @@ class Api extends CI_Controller {
 		echo json_encode($data);
 	}
 
-	public function loadFields(){
+	public function loadFields()
+	{
 		$this->load->model("M_database");
 
-		$data = json_decode(file_get_contents('php://input'),true); 
+		$data = json_decode(file_get_contents('php://input'), true);
 		$database_name =  $data['database_name'];
 		$table =  $data['table'];
 
-		validate($database_name,$table);
+		validate($database_name, $table);
 
-		$result['fields'] = $this->M_database->getFields($database_name,$table);
-		$result['primaryKey'] = $this->M_database->getPrimaryKey($database_name,$table);
+		$result['fields'] = $this->M_database->getFields($database_name, $table);
+		$result['primaryKey'] = $this->M_database->getPrimaryKey($database_name, $table);
 
 		echo json_encode($result);
 	}
 
 	public function generateControllerModel()
 	{
-		$data = json_decode(file_get_contents('php://input'),true); 
+		$data = json_decode(file_get_contents('php://input'), true);
+
 		$directory_project =  $data['directory_project'];
 		$controller_name =  $data['controller_name'];
 		$model_name =  $data['model_name'];
@@ -56,67 +65,96 @@ class Api extends CI_Controller {
 		$table =  $data['table'];
 		$fields =  $data['fields'];
 		$primaryKey =  $data['primaryKey'];
-		
-		
-		validate($directory_project,$controller_name,$model_name,$table
-				,$fields,$database,$primaryKey);
+		$select_generate =  $data['select_generate'];
 
-		$response['result_controller'] = false;
-		$response['result_model'] = false;
-		$response['message_controller'] = null;
-		$response['message_model'] = null;
+		validate(
+			$directory_project,
+			$controller_name,
+			$model_name,
+			$table,
+			$fields,
+			$database,
+			$primaryKey,
+			$select_generate
+		);
 
-		$file_controller = $this->checkFile(
-							$directory_project.$this->directory_controller.$controller_name.'.php');
 
-		if (!$file_controller){
-			// create controller file
-			// write controller template
-			$this->createAndWriteFile($directory_project.$this->directory_controller.$controller_name,
-										controllerTemplate($controller_name,$model_name,$fields,$primaryKey));
-			
-			$response['result_controller'] = true;
-			$response['message_controller'] = 'Controller file has been generated !';
-		}else{
-			$response['result_controller'] = false;
-			$response['message_controller'] = 'Controller file already exist !';
+		if ($select_generate == 1) 
+		{
+			$this->generateController($directory_project,$controller_name,$fields,$model_name,$primaryKey);
+		} else if ($select_generate == 2) 
+		{
+			$this->generateModel($directory_project,$model_name,$fields,$table,$primaryKey);
+		} else if ($select_generate == 3) 
+		{
+			$this->generateController($directory_project,$controller_name,$fields,$model_name,$primaryKey);
+			$this->generateModel($directory_project,$model_name,$fields,$table,$primaryKey);
 		}
+	}
+
+	private function generateModel($directory_project,$model_name,$fields,$table,$primaryKey){
+		
 
 		$file_model = $this->checkFile(
-						$directory_project.$this->directory_model.$model_name.'.php');
+			$directory_project . $this->directory_model . $model_name . '.php'
+		);
 
-		if (!$file_model){
+		if (!$file_model) {
 			// create model file
 			// write model template
-			$this->createAndWriteFile($directory_project.$this->directory_model.$model_name,
-										modelTemplate($model_name,$table,$primaryKey,$fields));
-			$response['result_model'] = true;
-			$response['message_model'] = 'Model file has been generated !';
-		}else{
-			$response['result_model'] = false;
-			$response['message_model'] = 'Model file already exist !';
+			$this->createAndWriteFile(
+				$directory_project . $this->directory_model . $model_name,
+				modelTemplate($model_name, $table, $primaryKey, $fields)
+			);
+			$this->result_model = true;
 		}
-
-		echo json_encode($response);
-			
+		$data['result_model'] = $this->result_model;
+		echo json_encode($data);
 	}
 
-	private function createAndWriteFile($file,$data){
-		$file= $file.".php";
-		$file = str_replace('\\\\','',$file);
+	private function generateController($directory_project,$controller_name,$fields,$model_name,$primaryKey)
+	{
 
-		if (!$this->checkFile($file)){	
-			$theFile= fopen($file, "w"); 
+		$file_controller = $this->checkFile(
+			$directory_project . $this->directory_controller . $controller_name . '.php'
+		);
+
+		if (!$file_controller) {
+			// create controller file
+			// write controller template
+			$this->createAndWriteFile(
+				$directory_project . $this->directory_controller . $controller_name,
+				controllerTemplate($controller_name, $model_name, $fields, $primaryKey)
+			);
+
+			$this->result_controller = true;
+		}
+		$data['result_controller'] = $this->result_controller;
+		echo json_encode($data);
+	}
+
+	private function createAndWriteFile($file, $data)
+	{
+		$file = $file . ".php";
+		$file = str_replace('\\\\', '', $file);
+
+		$is_dir = is_dir($file);
+
+		if (! is_dir($file)){
+			exit(json_encode(array('result' => false, 'message'=>'Directory is invalid')));
+		}
+
+		if (!$this->checkFile($file)) {
+			$theFile = fopen($file, "w");
 			fwrite($theFile, $data);
-		}else{
-			exit(json_encode(array('result'=>false,'File '.$file.' already exist')));
+		} else {
+			exit(json_encode(array('result' => false, 'File ' . $file . ' already exist')));
 		}
 	}
 
-	private function checkFile($value){
-		$value = str_replace('\\\\','',$value);
+	private function checkFile($value)
+	{
+		$value = str_replace('\\\\', '', $value);
 		return (file_exists($value)) ? true : false;
 	}
-
-	
 }

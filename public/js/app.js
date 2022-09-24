@@ -1,3 +1,8 @@
+ready(()=>{
+	Vony({
+		id:'directory_project'
+	}).focus();
+});
 new Vue({
 	el: '#app',
 	data: {
@@ -12,9 +17,18 @@ new Vue({
 		fields: null,
 		data_fields: null,
 		loading2: false,
-		primaryKey: null
+		primaryKey: null,
+		select_generate: 3
+	},
+	mounted() {
+	
 	},
 	methods: {
+		enterGenerate: function(e){
+			if (e.keyCode==13){
+				this.generate()
+			}
+		},
 		reset: function () {
 			resetStorage();
 			Swal.fire({
@@ -197,6 +211,16 @@ new Vue({
 				return;
 			}
 
+			if (this.select_generate==null){
+				console.log("Select That You Want To Generate")
+				return;
+			}
+			const $this= this;
+			
+			Vony({
+				id:'btn_generate'
+			}).disabled();
+
 			axios({
 				method: 'post',
 				url: API_GENERATE_CONTROLLER_MODEL,
@@ -207,54 +231,94 @@ new Vue({
 					database: this.database,
 					table: this.table,
 					fields: this.data_fields,
-					primaryKey: this.primaryKey
+					primaryKey: this.primaryKey,
+					select_generate : this.select_generate
 				},
 				headers: {
 					'X-Requested-With': 'XMLHttpRequest',
 					"Content-Type": 'application/json'
 				}
 			}).then(function (response) {
+				Vony({
+					id:'btn_generate'
+				}).enabled();
 				if (response.status == 200) {
-					var message_controller = response.data.message_controller;
-					var message_model = response.data.message_model;
 
+					var result = response.data.result;
+
+					if (result==false){
+						Swal.fire({
+							icon: 'error',
+							title: 'Uppz',
+							text: response.data.message,
+							footer: ''
+						});
+						$this.$refs.directory_project.focus()
+						return;
+					}
+				
 					var result_model = response.data.result_model;
 					var result_controller = response.data.result_controller;
 
-					if (result_controller) {
+					var message = '';
+
+					if ($this.select_generate==1){
+						if (result_controller==true) {
+							message = 'Controller Has Been Generated ';
+							Swal.fire({
+								icon: 'success',
+								title: 'Success',
+								text: message,
+								footer: ''
+							});
+						} else {
+							message = 'Controller Failed Generated ';
+							Swal.fire({
+								icon: 'error',
+								title: 'Uppz',
+								text: message,
+								footer: ''
+							});
+						}
+					}else if ($this.select_generate==2){
+						if (result_model==true) {
+							message = 'Model Has Been Generated ';
+							Swal.fire({
+								icon: 'success',
+								title: 'Success',
+								text: message,
+								footer: ''
+							});
+						} else {
+							message = 'Model Failed Generated ';
+							Swal.fire({
+								icon: 'error',
+								title: 'Uppz',
+								text: message,
+								footer: ''
+							});
+						}
+						
+					}else if ($this.select_generate==3){
+						if (result_controller==true) {
+							message += 'Controller Has Been Generated - ';
+						} else {
+							message += 'Controller Failed Generated - ';
+						}
+	
+						if (result_model==true) {
+							message += 'Model Has Been Generated ';
+						} else {
+							message += 'Model Failed Generated ';
+						}
+
 						Swal.fire({
-							icon: 'success',
-							title: 'Success',
-							text: message_controller,
+							icon: 'info',
+							title: 'Info',
+							text: message,
 							footer: ''
 						});
-						return;
-					} else {
-						Swal.fire({
-							icon: 'error',
-							title: 'Uppz',
-							text: message_controller,
-							footer: ''
-						});
-						return;
 					}
-
-					if (result_model) {
-						Swal.fire({
-							icon: 'success',
-							title: 'Success',
-							text: message_model,
-							footer: ''
-						})
-					} else {
-						Swal.fire({
-							icon: 'error',
-							title: 'Uppz',
-							text: message_model,
-							footer: ''
-						})
-					}
-
 				}
 			});
 
