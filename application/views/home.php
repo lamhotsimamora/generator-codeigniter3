@@ -16,7 +16,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 	<title>Generator Controller & Model Codeigniter 3</title>
 	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-	<script src="public/js/vony.js"></script>
+	<script src="<?= base_url() ?>public/js/vony.js"></script>
 	<style>
 		[v-cloak] {
 			display: none;
