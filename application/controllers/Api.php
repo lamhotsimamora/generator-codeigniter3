@@ -78,6 +78,11 @@ class Api extends CI_Controller
 			$select_generate
 		);
 
+		$is_dir = is_dir($directory_project);
+
+		if (! $is_dir){
+			exit(json_encode(array('result' => false, 'message'=>'Directory is invalid')));
+		}
 
 		if ($select_generate == 1) 
 		{
@@ -138,12 +143,7 @@ class Api extends CI_Controller
 		$file = $file . ".php";
 		$file = str_replace('\\\\', '', $file);
 
-		$is_dir = is_dir($file);
-
-		if (! is_dir($file)){
-			exit(json_encode(array('result' => false, 'message'=>'Directory is invalid')));
-		}
-
+		
 		if (!$this->checkFile($file)) {
 			$theFile = fopen($file, "w");
 			fwrite($theFile, $data);

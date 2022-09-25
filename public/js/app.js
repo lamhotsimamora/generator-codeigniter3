@@ -239,9 +239,11 @@ new Vue({
 					"Content-Type": 'application/json'
 				}
 			}).then(function (response) {
+				
 				Vony({
-					id:'btn_generate'
-				}).enabled();
+					id :'btn_generate'
+				}).enabled()
+
 				if (response.status == 200) {
 
 					var result = response.data.result;
