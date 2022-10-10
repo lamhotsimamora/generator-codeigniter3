@@ -16,6 +16,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
 	<title>Generator Controller & Model Codeigniter 3</title>
 	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+	
 	<script src="<?= base_url() ?>public/js/vony.js"></script>
 	<style>
 		[v-cloak] {
@@ -120,9 +122,12 @@ defined('BASEPATH') or exit('No direct script access allowed');
 					</label>
 				</div>
 				<hr>
-				<button type="button" @click="generate" id="btn_generate" class="btn btn-primary">Generate</button>
+				<button type="button" @click="generate" id="btn_generate" class="btn btn-primary">
+				<i class="icon-legal"></i>Generate</button>
 				<button type="button" @click="save" class="btn btn-success">Save</button>
 				<button type="button" @click="reset" class="btn btn-secondary">Reset</button>
+				<button type="button" @click="goToView" class="btn btn-dark">View</button>
+
 				<hr>
 				<a href="#" data-bs-toggle="modal" data-bs-target="#myModal">Read Me</a> |
 				<a href="<?= base_url() ?>template/controller" target="_blank">Controller Template</a> |

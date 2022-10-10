@@ -6,6 +6,7 @@ class Api extends CI_Controller
 
 	private $result_controller = false;
 	private $result_model = false;
+	private $result_view = false;
 
 	private $directory_controller = '/application/controllers/';
 	private $directory_model = '/application/models/';
@@ -117,6 +118,27 @@ class Api extends CI_Controller
 		echo json_encode($data);
 	}
 
+	private function createView($directory_project,$filename){
+		$final_path= $directory_project .'/application/views/'. $filename;
+
+		$file_view = $this->checkFile(
+			$final_path.'.php'
+		);
+
+		if (!$file_view) {
+			// create view file
+			// write view template
+			$this->createAndWriteFile(
+				$final_path,
+				viewTemplate($filename)
+			);
+
+			$this->result_view = true;
+		}
+		$data['result_view'] = $this->result_view;
+		echo json_encode($data);
+	}
+
 	private function generateController($directory_project,$controller_name,$fields,$model_name,$primaryKey)
 	{
 
@@ -157,4 +179,27 @@ class Api extends CI_Controller
 		$value = str_replace('\\\\', '', $value);
 		return (file_exists($value)) ? true : false;
 	}
+
+	public function generateView()
+	{
+		$data = json_decode(file_get_contents('php://input'), true);
+
+		$directory_project =  $data['directory_project'];
+		$filename =  $data['filename'];
+
+		validate(
+			$directory_project,
+			$filename
+		);
+
+		$is_dir = is_dir($directory_project);
+
+		if (! $is_dir){
+			exit(json_encode(array('result' => false, 'message'=>'Directory is invalid')));
+		}
+
+		$this->createView($directory_project,$filename);
+		
+	}
+
 }

@@ -28,6 +28,9 @@ ready(()=>{
 		
 		},
 		methods: {
+			goToView: function(){
+				reload('view');
+			},
 			enterGenerate: function(e){
 				if (e.keyCode==13){
 					this.generate()
