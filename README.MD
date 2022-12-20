@@ -16,5 +16,5 @@ Codeigniter 3
 ####
 Donasi secangkir kopi 
 
-OVO / GoPay : 081211126716
-Telegram : https://t.me/lamhotsimamora93
+OVO / GoPay : 081399453242
+Whatsapp : wa.me/6281399453242
