@@ -16,5 +16,6 @@ Codeigniter 3
 ####
 Donasi secangkir kopi 
 
-OVO / GoPay : 081399453242
+GoPay : 081399453242
+Dana : 082289953600
 Whatsapp : wa.me/6281399453242
